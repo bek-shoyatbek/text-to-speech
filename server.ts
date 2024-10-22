@@ -1,12 +1,10 @@
 import env from "./src/common/configs/index.ts";
-import {  ROOT_DIR, ROOT_DIR_PATH } from "./src/common/constants/index.ts";
+import { ROOT_DIR, ROOT_DIR_PATH } from "./src/common/constants/index.ts";
 import { Application } from "./deps.ts";
 import { send } from "./deps.ts";
 import { textToSpeechRouter } from "./src/text-to-speech/index.ts";
 
 const app = new Application();
-
-
 
 app.use(textToSpeechRouter.routes());
 
@@ -20,7 +18,6 @@ app.use(async (ctx, next) => {
     root: ROOT_DIR,
   });
 });
-
 
 await app.listen({ port: Number(env.APP_PORT) });
 
