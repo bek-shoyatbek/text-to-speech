@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Text to Speech Converter</h1>
+        <textarea id="text" placeholder="Enter your text here to convert it to speech..."></textarea>
+        <div class="button-group">
+            <button id="convert" class="button">
+                <i class="fas fa-play"></i>
+                Convert to Speech
+            </button>
+            <button id="download" class="button download" disabled>
+                <i class="fas fa-download"></i>
+                Download Audio
+            </button>
+        </div>
+        <p id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Converting text to speech...
+        </p>
+        <p id="error" class="error"></p>
+        <div id="audio-container" class="audio-container">
+            <audio id="audio" controls></audio>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById("text");
+        const convertButton = document.getElementById("convert");
+        const downloadButton = document.getElementById("download");
+        const audio = document.getElementById("audio");
+        const audioContainer = document.getElementById("audio-container");
+        const errorElement = document.getElementById("error");
+        const loadingElement = document.getElementById("loading");
+
+        let currentAudioUrl = null;
+        let currentAudioBlob = null;
+
+        async function convertTextToSpeech() {
+            try {
+                const text = textInput.value.trim();
+                
+                if (!text) {
+                    throw new Error("Please enter some text to convert");
+                }
+
+                // Reset UI state
+                convertButton.disabled = true;
+                downloadButton.disabled = true;
+                loadingElement.style.display = "block";
+                audioContainer.style.display = "none";
+                errorElement.style.display = "none";
+
+                // Clean up previous audio URL
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                }
+
+                const response = await fetch(`/text-to-speech?text=${encodeURIComponent(text)}`);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || "Failed to convert text to speech");
+                }
+
+                const audioData = await response.arrayBuffer();
+                currentAudioBlob = new Blob([audioData], { type: "audio/mpeg" });
+                currentAudioUrl = URL.createObjectURL(currentAudioBlob);
+                
+                audio.src = currentAudioUrl;
+                audioContainer.style.display = "block";
+                downloadButton.disabled = false;
+                
+            } catch (error) {
+                errorElement.textContent = error.message;
+                errorElement.style.display = "block";
+                console.error("Error:", error);
+            } finally {
+                convertButton.disabled = false;
+                loadingElement.style.display = "none";
+            }
+        }
+
+        function downloadAudio() {
+            if (currentAudioBlob && currentAudioUrl) {
+                const downloadUrl = currentAudioUrl;
+                const a = document.createElement("a");
+                a.href = downloadUrl;
+                a.download = "speech.mp3"; // You can customize the filename
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+
+        // Event listeners
+        convertButton.addEventListener("click", convertTextToSpeech);
+        downloadButton.addEventListener("click", downloadAudio);
+        
+        textInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter" && e.ctrlKey) {
+                convertTextToSpeech();
+            }
+        });
+
+        // Clean up on page unload
+        window.addEventListener("beforeunload", () => {
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+        });
+    </script>
+</body>
+</html>
