@@ -1,4 +1,3 @@
-import env from "./src/common/configs/index.ts";
 import { ROOT_DIR, ROOT_DIR_PATH } from "./src/common/constants/index.ts";
 import { Application } from "./deps.ts";
 import { send } from "./deps.ts";
@@ -19,6 +18,11 @@ app.use(async (ctx, next) => {
   });
 });
 
-await app.listen({ port: Number(env.APP_PORT) });
+const appPort = +Deno.env.get("APP_PORT");
 
-console.log(`Server is running on port ${env.APP_PORT}`);
+if (!appPort) {
+  throw new Error("APP_PORT is not set");
+}
+await app.listen({ port: appPort });
+
+console.log(`Server is running on port ${appPort}`);

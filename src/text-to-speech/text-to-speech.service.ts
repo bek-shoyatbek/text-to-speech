@@ -1,10 +1,9 @@
 import * as PlayHT from "npm:playht";
-import env from "../common/configs/index.ts";
 
 export class TextToSpeechService {
   constructor() {
-    const userId = env.PLAYHT_USER_ID;
-    const apiKey = env.PLAYHT_API_KEY;
+    const userId = Deno.env.get("PLAYHT_USER_ID");
+    const apiKey = Deno.env.get("PLAYHT_API_KEY");
 
     if (!userId || !apiKey) {
       throw new Error("PLAYHT_USER_ID and PLAYHT_API_KEY must be set");
