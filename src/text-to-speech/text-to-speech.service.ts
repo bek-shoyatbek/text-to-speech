@@ -1,3 +1,4 @@
+import type { VoiceAgeGroup } from "playht";
 import * as PlayHT from "npm:playht";
 
 export class TextToSpeechService {
@@ -15,7 +16,7 @@ export class TextToSpeechService {
     });
   }
 
-  async convertTextToSpeech(text: string) {
+  async convertTextToSpeechStream(text: string) {
     try {
       const stream = await PlayHT.stream(text, {
         voiceEngine: "Play3.0-mini",
@@ -27,5 +28,25 @@ export class TextToSpeechService {
       console.error("Text to speech conversion failed:", error);
       throw new Error("Failed to convert text to speech");
     }
+  }
+
+  async getListOfVoices(
+    gender: "male" | "female" = "female",
+    ageGroup: VoiceAgeGroup[] = ["adult"],
+  ) {
+    const voices = await PlayHT.listVoices({
+      gender,
+      ageGroup,
+    });
+
+    return voices;
+  }
+
+  async convertTextToSpeechFull(text: string) {
+    const response = await PlayHT.generate(text, {
+      outputFormat: "mp3",
+      voiceEngine: "PlayHT2.0",
+    });
+    return response;
   }
 }

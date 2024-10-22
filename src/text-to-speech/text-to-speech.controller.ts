@@ -1,10 +1,15 @@
-// text-to-speech.controller.ts
 import { Buffer } from "node:buffer";
 import { Router } from "../../deps.ts";
 import { TextToSpeechService } from "./text-to-speech.service.ts";
 
 export const textToSpeechRouter = new Router();
 const textToSpeechService = new TextToSpeechService();
+
+textToSpeechRouter.get("/voices", async (ctx) => {
+  const voices = await textToSpeechService.getListOfVoices();
+  ctx.response.body = voices;
+  return;
+});
 
 textToSpeechRouter.get("/text-to-speech", async (ctx) => {
   try {
@@ -17,7 +22,7 @@ textToSpeechRouter.get("/text-to-speech", async (ctx) => {
       return;
     }
 
-    const audioData = await textToSpeechService.convertTextToSpeech(text);
+    const audioData = await textToSpeechService.convertTextToSpeechStream(text);
 
     // Set proper headers for audio streaming
     ctx.response.headers.set("Content-Type", "audio/mpeg");
@@ -63,3 +68,6 @@ textToSpeechRouter.get("/text-to-speech", async (ctx) => {
     ctx.response.body = { error: "Internal server error" };
   }
 });
+
+
+

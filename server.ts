@@ -5,8 +5,8 @@ import { textToSpeechRouter } from "./src/text-to-speech/index.ts";
 const app = new Application();
 
 app.use(oakCors());
-app.use(textToSpeechRouter.allowedMethods());
 app.use(textToSpeechRouter.routes());
+app.use(textToSpeechRouter.allowedMethods());
 
 app.use(async (ctx, next) => {
   if (!ctx.request.url.pathname.startsWith(ROOT_DIR_PATH)) {
