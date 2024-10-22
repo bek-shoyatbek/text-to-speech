@@ -16,13 +16,20 @@ export class TextToSpeechService {
     });
   }
 
-  async convertTextToSpeechStream(text: string) {
+  async convertTextToSpeechStream(
+    text: string,
+    voiceId: string,
+    speed: number,
+    quality: "low" | "medium" | "high",
+  ) {
     try {
       const stream = await PlayHT.stream(text, {
+        voiceId,
         voiceEngine: "Play3.0-mini",
-        speed: 0.9,
-        quality: "medium", // Added for better performance
+        speed,
+        quality,
       });
+      
       return stream;
     } catch (error) {
       console.error("Text to speech conversion failed:", error);

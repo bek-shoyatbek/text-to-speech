@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
 import { Router } from "../../deps.ts";
 import { TextToSpeechService } from "./text-to-speech.service.ts";
+import { validateSpeechOptions } from "../common/validators/validate-speech-options.ts";
 
 export const textToSpeechRouter = new Router();
 const textToSpeechService = new TextToSpeechService();
@@ -14,15 +15,14 @@ textToSpeechRouter.get("/voices", async (ctx) => {
 textToSpeechRouter.get("/text-to-speech", async (ctx) => {
   try {
     const { request } = ctx;
-    const text = request.url.searchParams.get("text");
+    const { text, voiceId, speed, quality } = validateSpeechOptions(request);
 
-    if (!text) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: "Text parameter is required" };
-      return;
-    }
-
-    const audioData = await textToSpeechService.convertTextToSpeechStream(text);
+    const audioData = await textToSpeechService.convertTextToSpeechStream(
+      text,
+      voiceId,
+      speed,
+      quality,
+    );
 
     // Set proper headers for audio streaming
     ctx.response.headers.set("Content-Type", "audio/mpeg");
