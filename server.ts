@@ -1,10 +1,11 @@
 import { ROOT_DIR, ROOT_DIR_PATH } from "./src/common/constants/index.ts";
-import { Application } from "./deps.ts";
-import { send } from "./deps.ts";
+import { Application, oakCors, send } from "./deps.ts";
 import { textToSpeechRouter } from "./src/text-to-speech/index.ts";
 
 const app = new Application();
 
+app.use(oakCors());
+app.use(textToSpeechRouter.allowedMethods());
 app.use(textToSpeechRouter.routes());
 
 app.use(async (ctx, next) => {
@@ -18,11 +19,11 @@ app.use(async (ctx, next) => {
   });
 });
 
-const appPort = +Deno.env.get("APP_PORT");
+const appPort = Deno.env.get("APP_PORT");
 
 if (!appPort) {
   throw new Error("APP_PORT is not set");
 }
-await app.listen({ port: appPort });
+await app.listen({ port: Number(appPort) });
 
 console.log(`Server is running on port ${appPort}`);
